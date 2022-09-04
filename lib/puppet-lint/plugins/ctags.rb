@@ -9,12 +9,12 @@ PuppetLint.new_check(:ctags) do
       next unless name_token
 
       notify :warning, {
-        message: name_token.value,
+        message: "#{name_token.value}\t#{path}\t#{name_token.line};\"",
         line: name_token.line,
         column: name_token.column
       }
       notify :warning, {
-        message: "#{name_token.prev_code_token.value}[#{name_token.value}]",
+        message: "#{name_token.prev_code_token.value}[#{name_token.value}]\t#{path}\t#{name_token.line};\"",
         line: name_token.line,
         column: name_token.column
       }
@@ -41,7 +41,7 @@ PuppetLint.new_check(:ctags) do
         resource_type = resource_type_token.value.delete_prefix('::')
 
         notify :warning, {
-          message: "#{resource_type.capitalize}['#{resource_name}']",
+          message: "#{resource_type.capitalize}['#{resource_name}']\t#{path}\t#{resource_name_token.line};\"",
           line: resource_name_token.line,
           column: resource_name_token.column
         }
@@ -59,12 +59,40 @@ PuppetLint.new_check(:ctags) do
       next unless token.next_code_token.type == :EQUALS && !local_variables.include?(token)
 
       notify :warning, {
-        message: "$#{token.value}",
+        message: "$#{token.value}\t#{path}\t#{token.line};\"",
         line: token.line,
         column: token.column
       }
     end
 
-    # TODO: file, template
+    # file, template
+    tokens.select { |token| token.type == :FUNCTION_NAME }.each do |token|
+      next unless %w[template file].include?(token.value) && token.prev_code_token.type == :FARROW
+
+      file_token = token.next_code_token.next_code_token
+      next if file_token.type != :SSTRING
+
+      file = file_token.value
+      parts = file.split('/', 2)
+      dirname = path.split('/manifests/')[0]
+      possible_paths = [
+        "#{dirname}/#{token.value}s/#{parts[1]}",
+        "#{dirname}/../#{parts[0]}/#{token.value}s/#{parts[1]}",
+        "#{dirname}/../../forge/#{parts[0]}/#{token.value}s/#{parts[1]}",
+        "#{dirname}/../../modules/#{parts[0]}/#{token.value}s/#{parts[1]}",
+        "#{dirname}/../../profiles/#{parts[0]}/#{token.value}s/#{parts[1]}",
+        "#{dirname}/../../services/#{parts[0]}/#{token.value}s/#{parts[1]}"
+      ]
+      possible_paths.each do |p|
+        next unless File.exist?(p)
+
+        notify :warning, {
+          message: "#{file}\t#{p}\t1;\"",
+          line: token.line,
+          column: token.column
+        }
+        break
+      end
+    end
   end
 end
