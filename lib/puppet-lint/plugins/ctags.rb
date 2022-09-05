@@ -20,6 +20,11 @@ PuppetLint.new_check(:ctags) do
         line: name_token.line,
         column: name_token.column
       }
+      notify :warning, {
+        message: "#{name_token.prev_code_token.value.capitalize}['::#{class_name}']\t#{path}\t#{name_token.line};\"",
+        line: name_token.line,
+        column: name_token.column
+      }
     end
 
     # resource
@@ -65,9 +70,14 @@ PuppetLint.new_check(:ctags) do
         line: token.line,
         column: token.column
       }
+      notify :warning, {
+        message: "$::#{token.value}\t#{path}\t#{token.line};\"",
+        line: token.line,
+        column: token.column
+      }
     end
 
-    # file, template
+    # file/template
     tokens.select { |token| token.type == :FUNCTION_NAME }.each do |token|
       next unless %w[template file].include?(token.value) && token.prev_code_token.type == :FARROW
 
