@@ -8,13 +8,15 @@ PuppetLint.new_check(:ctags) do
       name_token = class_token.next_token_of(%i[NAME FUNCTION_NAME])
       next unless name_token
 
+      class_name = name_token.value.delete_prefix('::')
+
       notify :warning, {
-        message: "#{name_token.value}\t#{path}\t#{name_token.line};\"",
+        message: "#{class_name}\t#{path}\t#{name_token.line};\"",
         line: name_token.line,
         column: name_token.column
       }
       notify :warning, {
-        message: "#{name_token.prev_code_token.value}[#{name_token.value}]\t#{path}\t#{name_token.line};\"",
+        message: "#{name_token.prev_code_token.value.capitalize}['#{class_name}']\t#{path}\t#{name_token.line};\"",
         line: name_token.line,
         column: name_token.column
       }
