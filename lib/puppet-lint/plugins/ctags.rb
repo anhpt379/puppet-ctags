@@ -126,7 +126,7 @@ PuppetLint.new_check(:ctags) do
         next unless File.exist?(p)
 
         notify :warning, {
-          message: "#{file}\t#{p}\t1",
+          message: "#{token.value}\t#{p}\t1",
           line: token.line,
           column: token.column
         }
