@@ -107,6 +107,33 @@ PuppetLint.new_check(:ctags) do
       end
     end
 
+    # file source
+    tokens.select { |token| token.type == :SSTRING }.each do |token|
+      next unless token.prev_code_token.type == :FARROW && token.value.start_with?('puppet:///')
+
+      file = token.value.split('puppet:///modules/', 2)[1]
+      parts = file.split('/', 2)
+      dirname = path.split('/manifests/')[0]
+      possible_paths = [
+        "#{dirname}/files/#{parts[1]}",
+        "#{dirname}/../#{parts[0]}/files/#{parts[1]}",
+        "#{dirname}/../../forge/#{parts[0]}/files/#{parts[1]}",
+        "#{dirname}/../../modules/#{parts[0]}/files/#{parts[1]}",
+        "#{dirname}/../../profiles/#{parts[0]}/files/#{parts[1]}",
+        "#{dirname}/../../services/#{parts[0]}/files/#{parts[1]}"
+      ]
+      possible_paths.each do |p|
+        next unless File.exist?(p)
+
+        notify :warning, {
+          message: "#{file}\t#{p}\t1",
+          line: token.line,
+          column: token.column
+        }
+        break
+      end
+    end
+
     # TODO: class params hieradata keys
   end
 end
