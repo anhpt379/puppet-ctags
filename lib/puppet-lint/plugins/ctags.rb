@@ -66,12 +66,12 @@ PuppetLint.new_check(:ctags) do
       next unless token.next_code_token.type == :EQUALS && !local_variables.include?(token)
 
       notify :warning, {
-        message: "$#{token.value}\t#{path}\t#{token.line};\"",
+        message: "$#{token.value}\t#{path}\t#{token.line}",
         line: token.line,
         column: token.column
       }
       notify :warning, {
-        message: "$::#{token.value}\t#{path}\t#{token.line};\"",
+        message: "$::#{token.value}\t#{path}\t#{token.line}",
         line: token.line,
         column: token.column
       }
@@ -99,12 +99,14 @@ PuppetLint.new_check(:ctags) do
         next unless File.exist?(p)
 
         notify :warning, {
-          message: "#{file}\t#{p}\t1;\"",
+          message: "#{file}\t#{p}\t1",
           line: token.line,
           column: token.column
         }
         break
       end
     end
+
+    # TODO: class params hieradata keys
   end
 end
