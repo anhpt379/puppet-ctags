@@ -11,17 +11,17 @@ PuppetLint.new_check(:ctags) do
       class_name = name_token.value.delete_prefix('::')
 
       notify :warning, {
-        message: "#{class_name}\t#{path}\t#{name_token.line};\"",
+        message: "#{class_name}\t#{path}\t#{name_token.line}",
         line: name_token.line,
         column: name_token.column
       }
       notify :warning, {
-        message: "#{name_token.prev_code_token.value.capitalize}['#{class_name}']\t#{path}\t#{name_token.line};\"",
+        message: "#{name_token.prev_code_token.value.capitalize}['#{class_name}']\t#{path}\t#{name_token.line}",
         line: name_token.line,
         column: name_token.column
       }
       notify :warning, {
-        message: "#{name_token.prev_code_token.value.capitalize}['::#{class_name}']\t#{path}\t#{name_token.line};\"",
+        message: "#{name_token.prev_code_token.value.capitalize}['::#{class_name}']\t#{path}\t#{name_token.line}",
         line: name_token.line,
         column: name_token.column
       }
@@ -48,7 +48,7 @@ PuppetLint.new_check(:ctags) do
         resource_type = resource_type_token.value.delete_prefix('::')
 
         notify :warning, {
-          message: "#{resource_type.capitalize}['#{resource_name}']\t#{path}\t#{resource_name_token.line};\"",
+          message: "#{resource_type.capitalize}['#{resource_name}']\t#{path}\t#{resource_name_token.line}",
           line: resource_name_token.line,
           column: resource_name_token.column
         }
