@@ -82,7 +82,7 @@ PuppetLint.new_check(:ctags) do
       next unless %w[template file].include?(token.value) && token.prev_code_token.type == :FARROW
 
       file_token = token.next_code_token.next_code_token
-      next if file_token.type != :SSTRING
+      next unless %i[SSTRING STRING].include?(file_token.type)
 
       file = file_token.value
       parts = file.split('/', 2)
@@ -108,7 +108,7 @@ PuppetLint.new_check(:ctags) do
     end
 
     # file source
-    tokens.select { |token| token.type == :SSTRING }.each do |token|
+    tokens.select { |token| %i[SSTRING STRING].include?(token.type) }.each do |token|
       next unless token.prev_code_token.type == :FARROW && token.value.start_with?('puppet:///')
 
       file = token.value.split('puppet:///modules/', 2)[1]
