@@ -83,23 +83,29 @@ PuppetLint.new_check(:ctags) do
       }
     end
 
-    # file/template
+    # file/template/epp
     tokens.select { |token| token.type == :FUNCTION_NAME }.each do |token|
-      next unless %w[template file].include?(token.value) && token.prev_code_token.type == :FARROW
+      next unless %w[template file epp].include?(token.value) && token.prev_code_token.type == :FARROW
 
       file_token = token.next_code_token.next_code_token
       next unless %i[SSTRING STRING].include?(file_token.type)
 
       file = file_token.value
       parts = file.split('/', 2)
-      dirname = path.split('/manifests/')[0]
+
+      dirname = if token.value == 'epp'
+                  'templates'
+                else
+                  "#{token.value}s"
+                end
+      module_path = path.split('/manifests/')[0]
       possible_paths = [
-        "#{dirname}/#{token.value}s/#{parts[1]}",
-        "#{dirname}/../#{parts[0]}/#{token.value}s/#{parts[1]}",
-        "#{dirname}/../../forge/#{parts[0]}/#{token.value}s/#{parts[1]}",
-        "#{dirname}/../../modules/#{parts[0]}/#{token.value}s/#{parts[1]}",
-        "#{dirname}/../../profiles/#{parts[0]}/#{token.value}s/#{parts[1]}",
-        "#{dirname}/../../services/#{parts[0]}/#{token.value}s/#{parts[1]}"
+        "#{module_path}/#{dirname}/#{parts[1]}",
+        "#{module_path}/../#{parts[0]}/#{dirname}/#{parts[1]}",
+        "#{module_path}/../../forge/#{parts[0]}/#{dirname}/#{parts[1]}",
+        "#{module_path}/../../modules/#{parts[0]}/#{dirname}/#{parts[1]}",
+        "#{module_path}/../../profiles/#{parts[0]}/#{dirname}/#{parts[1]}",
+        "#{module_path}/../../services/#{parts[0]}/#{dirname}/#{parts[1]}"
       ]
       possible_paths.each do |p|
         next unless File.exist?(p)
