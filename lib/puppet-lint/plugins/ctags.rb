@@ -16,6 +16,11 @@ PuppetLint.new_check(:ctags) do
         column: name_token.column
       }
       notify :warning, {
+        message: "::#{class_name}\t#{path}\t#{name_token.line}",
+        line: name_token.line,
+        column: name_token.column
+      }
+      notify :warning, {
         message: "#{name_token.prev_code_token.value.capitalize}['#{class_name}']\t#{path}\t#{name_token.line}",
         line: name_token.line,
         column: name_token.column
