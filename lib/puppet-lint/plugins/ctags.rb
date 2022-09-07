@@ -46,6 +46,7 @@ PuppetLint.new_check(:ctags) do
 
         resource_type_token = resource_name_token.prev_token_of(:LBRACE).prev_code_token
         resource_type = resource_type_token.value.delete_prefix('::')
+        next if resource_type == 'class'
 
         notify :warning, {
           message: "#{resource_type.capitalize}['#{resource_name}']\t#{path}\t#{resource_name_token.line}",
